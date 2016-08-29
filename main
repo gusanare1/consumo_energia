@@ -1,0 +1,36 @@
+ #!/bin/bash
+echo "Enter the name: "
+read -s -e usua
+cat /etc/passwd | grep $usua | cut -d ":" -f 1 >listaUsuarios.txt
+i=0
+
+for usuario in `cat listaUsuarios.txt`; do
+cd /home/$usuario
+ls -l | grep $usuario | cut -d " " -f 3,4,5,6 | grep -o '[0-9]*' > tam.txt
+
+for temp in `cat tam.txt`; do
+
+usuario=$usuario;
+tamano=$temp
+grupo=""
+
+echo $i"USUARIO: "$usuario;
+echo $i"TAMANO: "$tamano;
+
+$(mysql -u root --password="PASSWORD" --database="DATABASE"<<QUERY_INPUT
+INSERT into fundalinux values ( '$usuario', '$grupo', "$tamano");
+QUERY_INPUT
+)
+
+done
+
+done
+
+co=$(mysql -u root --password="PASSWORD" --database="DATABASE"<<QUERY_INPUT
+select concat(usuario, '-', sum(tamano))as '' from fundalinux group by grupo;
+QUERY_INPUT
+)
+
+echo $co>lx.txt
+
+cat lx.txt | tr ' ' '\n'
